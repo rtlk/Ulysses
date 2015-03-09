@@ -36,7 +36,7 @@ end
 local needs_auth = {}
 
 local function onEntCreated( ent )
-	if ent:IsPlayer() and needs_auth[ ent:UserID() ] then
+	if ent:IsPlayer() and ent:IsValid() and needs_auth[ ent:UserID() ] then
 		hook.Call( ULib.HOOK_UCLAUTH, _, ent ) -- Because otherwise the server might call this before the player is created
 		needs_auth[ ent:UserID() ] = nil
 	end
@@ -46,6 +46,10 @@ hook.Add( "OnEntityCreated", "ULibPlayerAuthCheck", onEntCreated, -20 ) -- Liste
 local function onInitPostEntity()
 	if LocalPlayer():IsValid() then
 		hook.Call( ULib.HOOK_LOCALPLAYERREADY, _, LocalPlayer() )
+		if needs_auth[ LocalPlayer():UserID() ] then
+			hook.Call( ULib.HOOK_UCLAUTH, _, LocalPlayer() )
+			needs_auth[ LocalPlayer():UserID() ] = nil
+		end
 		RunConsoleCommand( "ulib_cl_ready" )
 	end
 end
